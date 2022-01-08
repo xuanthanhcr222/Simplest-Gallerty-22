@@ -1,7 +1,10 @@
 package com.example.galleryv1;
 
+import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
+import android.provider.MediaStore;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -23,6 +26,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashSet;
 
 public class FragmentAlbum extends Fragment {
 
@@ -52,130 +56,103 @@ public class FragmentAlbum extends Fragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        albums = new ArrayList<>();
-
-
-        String externalStoragePath = Environment.getExternalStorageDirectory().toString()+"/DCIM";
-
-        try {
-            albumDirectoryBrowsing(externalStoragePath,albums);
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
-
-//        File directory = new File(externalStoragePath);
-//        File[] folders = directory.listFiles();
-//
-//
-//        for (File folder : folders)
-//        {
-//            if(folder.isDirectory())
-//            {
-//
-//                if (folder.getName().equals(".thumbnails"))
-//                {
-//                    Log.e("Thump", folder.getName());
-//                    continue;
-//                }
-//
-//                Log.e("Album", folder.toString() +  " --> alumn");
-//                DateFormat df =new SimpleDateFormat("yyyy.MM.dd G 'at' HH:mm:ss z");
-//                try {
-//                    BasicFileAttributes folderDetail = Files.readAttributes( folder.toPath(), BasicFileAttributes.class);
-//
-//                    Date folderCreateDate = df.parse(df.format(folderDetail.creationTime().toMillis()));
-//
-//                    File[] files = folder.listFiles();
-//
-//                    ArrayList<Photo> photos = new ArrayList<>();
-//                    for (File file : files)
-//                    {
-//                        BasicFileAttributes fileDetail = Files.readAttributes( file.toPath(), BasicFileAttributes.class);
-//                        Date photoCreateDate = df.parse(df.format(folderDetail.creationTime().toMillis()));
-//
-//                        photos.add( new Photo(file.getName(),file.getAbsolutePath(),photoCreateDate,new ArrayList<>()));
-//
-//
-//
-//                    }
-//
-//                    albums.add(new Album(folder.getName(),folder.getAbsolutePath(),folderCreateDate,photos));
-//                } catch (IOException e) {
-//                    e.printStackTrace();
-//                } catch (ParseException e) {
-//                    e.printStackTrace();
-//                }
-//
-//            }
-//        }
+        getAllAlbums();
     }
 
-    void albumDirectoryBrowsing(String directoryStrPath, ArrayList<Album>albums) throws IOException, ParseException {
-
-        //Tạo thư mục từ đường dẫn
-        File directory = new File(directoryStrPath);
-
-        //Date format
-        DateFormat df = new SimpleDateFormat("yyyy.MM.dd G 'at' HH:mm:ss z");
-        //Lấy các thuộc tính của directory;
-        BasicFileAttributes directoryDetail = Files.readAttributes(directory.toPath(), BasicFileAttributes.class);
-        Date albumCreateDate = df.parse(df.format(directoryDetail.creationTime().toMillis()));
-
-
-        //Tạo ArrayList mới
-        ArrayList<Photo> photos = new ArrayList<>();
-
-        //Tạo Album mới
-        Album album = new Album(directory.getName(),directory.getAbsolutePath(),albumCreateDate, photos);
-
-
-        // Lấy danh sách các item ở trong directory -> tạo thành File[] folders
-
-        File[] folder = directory.listFiles();
-
-        //Duyệt qua từng item con
-
-        //Nếu như là 1 directory thì
-        //Bỏ qua các ".thumbnails"
-        //
-
-        //Ngược lại, Nếu như là file thì kiểm tra nếu là file (jpg, png) -> add vào photos của album hiện tại
-
-        for (File item : folder) {
-            if (item.isDirectory())
-            {
-                if (item.getName().equals(".thumbnails")) {
-                    continue;
-                }
-                else
-                {
-                    Log.e("foldername: ",item.getName());
-
-                    albumDirectoryBrowsing(item.getAbsolutePath(),albums);
-                }
-            }
-            else
-            {
-                String fileName = item.getName();
-                String extension = fileName.substring(fileName.lastIndexOf("."));
-
-                if(extension.equalsIgnoreCase(".jpg") ||
-                        extension.equalsIgnoreCase(".png"))
-                {
-
-                    BasicFileAttributes fileDetail = Files.readAttributes(item.toPath(), BasicFileAttributes.class);
-                    Date photoCreateDate = df.parse(df.format(fileDetail.creationTime().toMillis()));
-
-                    Log.e("filename: ",item.getName());
-                    photos.add(new Photo(item.getName(), item.getAbsolutePath(), photoCreateDate, new ArrayList<>()));
-                }
-
-            }
+    private void getAllAlbums() {
+        if (albums != null) {
+            albums.clear();
+        } else {
+            albums = new ArrayList<>();
         }
 
-        albums.add(album);
+        ArrayList<Album> albumArrayList = new ArrayList<>();
+
+        String[] albumProjection = {
+                MediaStore.Images.ImageColumns.BUCKET_DISPLAY_NAME,
+                MediaStore.Images.ImageColumns.DATA,
+                MediaStore.Images.ImageColumns.DISPLAY_NAME
+        };
+
+        Cursor albumCursor = getContext().getContentResolver().query(
+                MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+                albumProjection,
+                null, // Selection args (none).
+                null,
+                null
+        );
+
+//        Cursor cursor = getContext().getContentResolver().query(allImagesuri, projection, null, null, null);
+
+        try {
+            if (albumCursor != null) {
+                albumCursor.moveToFirst();
+            }
+            do {
+                String albumName = albumCursor.getString(albumCursor.getColumnIndexOrThrow(MediaStore.Images.ImageColumns.BUCKET_DISPLAY_NAME));
+                String fileName = albumCursor.getString(albumCursor.getColumnIndexOrThrow(MediaStore.Images.ImageColumns.DISPLAY_NAME));
+                String filePath = albumCursor.getString(albumCursor.getColumnIndexOrThrow(MediaStore.Images.ImageColumns.DATA));
+
+                int index = filePath.lastIndexOf("/" + fileName);
+                String albumPath = filePath.substring(0, index);
+
+                Album album = new Album(albumName, albumPath, "");
+
+                albumArrayList.add(album);
+
+
+            } while (albumCursor.moveToNext());
+            albumCursor.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        HashSet<Album> uniqueAlbum = new HashSet<>(albumArrayList);
+
+        albums = new ArrayList<>(uniqueAlbum);
+
+
+//        ArrayList<String> thumbs = new ArrayList<>();
+
+        int countAlbum = albums.size();
+
+
+        for (int i = 0; i < countAlbum; i++) {
+            String albumPath = albums.get(i).getSrc();
+            String albumName = albums.get(i).getName();
+
+            String[] albumThumbProjection = {"MAX(" + MediaStore.Images.ImageColumns.DATE_MODIFIED + ")",
+                    MediaStore.Images.ImageColumns.DATA,
+                    MediaStore.Images.ImageColumns.DISPLAY_NAME,
+                    MediaStore.Images.ImageColumns.BUCKET_DISPLAY_NAME
+            };
+
+//            /storage/emulated/0/DCIM
+//            /storage/emulated/0/DCIM/Screenshots/Screenshot_20211206-021132_GalleryV1.jpg
+//            Screenshot_20211206-021132_GalleryV1.jpg
+//            20211204_170045.jpg
+            Cursor albumThumbCursor = getContext().getContentResolver().query(
+                    MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+                    albumThumbProjection,
+                    MediaStore.Images.ImageColumns.BUCKET_DISPLAY_NAME + " = ? ",
+                    new String[]{albumName},
+                    null
+            );
+
+            try {
+                if (albumThumbCursor != null) {
+                    albumThumbCursor.moveToFirst();
+                }
+                do {
+//                    String name = albumThumbCursor.getString(albumThumbCursor.getColumnIndexOrThrow(MediaStore.Images.ImageColumns.DISPLAY_NAME));
+                    String path = albumThumbCursor.getString(albumThumbCursor.getColumnIndexOrThrow(MediaStore.Images.ImageColumns.DATA));
+//                    thumbs.add(path);
+                    albums.get(i).setThumbnail(path);
+                } while (albumThumbCursor.moveToNext());
+                albumThumbCursor.close();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
     }
 }

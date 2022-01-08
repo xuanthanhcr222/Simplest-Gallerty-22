@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.os.Bundle;
 import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -15,6 +16,8 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.bumptech.glide.Glide;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -64,25 +67,30 @@ public class AlbumAdapter extends RecyclerView.Adapter<AlbumAdapter.ViewHolder>{
     @Override
     public void onBindViewHolder(@NonNull AlbumAdapter.ViewHolder holder, @SuppressLint("RecyclerView") int position) {
 
-        String thumbnail = getThumbnail(position);
-//        holder.albumImageView.setImageResource(thumbnail);
+        Glide.with(context).load("file://"+albums.get(position).getThumbnail())
+                .skipMemoryCache(false)
+                .into(holder.albumImageView);
 
-        File file = new File(thumbnail);
-        Bitmap myBitmap = BitmapFactory.decodeFile(file.getAbsolutePath());
-        holder.albumImageView.setImageBitmap(myBitmap);
+//        String thumbnail = getThumbnail(position);
+////        holder.albumImageView.setImageResource(thumbnail);
+//
+//        File file = new File(thumbnail);
+//        Bitmap myBitmap = BitmapFactory.decodeFile(file.getAbsolutePath());
+//        holder.albumImageView.setImageBitmap(myBitmap);
+
+
         holder.albumName.setText(getAlbums().get(position).getName());
 
         holder.mainLayout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-//                Intent intent = new Intent(context, FullImageView.class);
-//                intent.putExtra("Album", albumSrc);
-//                intent.putExtra("details_name", albums.get(position).getName());
-//                intent.putExtra("details_date", albums.get(position).getCreatedDate().toString());
-//                intent.putExtra("details_dimension", getDemension(albumSrc));
-//                intent.putExtra("details_size", getSize(albumSrc));
-//                intent.putExtra("details_src", "@drawable :))");
-//                context.startActivity(intent);
+                Intent intent = new Intent(context, AlbumDetail.class);
+
+                Album album = albums.get(position);
+                Bundle albumBundle = new Bundle();
+                albumBundle.putSerializable("album", album);
+                intent.putExtra("albumBundle",albumBundle);
+                context.startActivity(intent);
             }
         });
     }

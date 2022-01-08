@@ -1,9 +1,16 @@
 package com.example.galleryv1;
 
-public class Video {
+import java.io.Serializable;
+
+public class Video implements Serializable {
     String path,thumb;
     boolean selected;
 
+    public Video(String path, String thumb, boolean selected) {
+        this.path = path;
+        this.thumb = thumb;
+        this.selected = selected;
+    }
 
     public String getPath() {
         return path;

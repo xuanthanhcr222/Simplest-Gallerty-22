@@ -1,19 +1,20 @@
 package com.example.galleryv1;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Objects;
 
-public class Album {
+public class Album implements Serializable{
     private String name;
     private String src;
-    private Date createdDate;
-    private ArrayList<Photo> photoArrayList;
+    private String thumbnail;
 
-    public Album(String name, String src, Date createdDate, ArrayList<Photo> photoArrayList) {
+
+    public Album(String name, String src, String thumbnail) {
         this.name = name;
         this.src = src;
-        this.createdDate = createdDate;
-        this.photoArrayList = photoArrayList;
+        this.thumbnail = thumbnail;
     }
 
     public String getName() {
@@ -32,29 +33,24 @@ public class Album {
         this.src = src;
     }
 
-    public Date getCreatedDate() {
-        return createdDate;
+    public String getThumbnail() {
+        return thumbnail;
     }
 
-    public void setCreatedDate(Date createdDate) {
-        this.createdDate = createdDate;
+    public void setThumbnail(String thumbnail) {
+        this.thumbnail = thumbnail;
     }
 
-    public ArrayList<Photo> getPhotoArrayList() {
-        return photoArrayList;
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Album album = (Album) o;
+        return Objects.equals(name, album.name) && Objects.equals(src, album.src) && Objects.equals(thumbnail, album.thumbnail);
     }
 
-    public void setPhotoArrayList(ArrayList<Photo> photoArrayList) {
-        this.photoArrayList = photoArrayList;
+    @Override
+    public int hashCode() {
+        return Objects.hash(name, src, thumbnail);
     }
-
-    public String getThumbnail()
-    {
-        if (photoArrayList.size() == 0)
-            return  "";
-
-        int size = photoArrayList.size();
-        return photoArrayList.get(size-1).getSrc();
-    }
-
 }

@@ -5,6 +5,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
+import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -25,12 +26,12 @@ public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.ViewHolder> 
 
 
     Context context;
-    ArrayList<Video>arr;
+    ArrayList<Video> videos;
     Activity activity;
 
-    public VideoAdapter(Context context, ArrayList<Video> arr, Activity activity) {
+    public VideoAdapter(Context context, ArrayList<Video> videos, Activity activity) {
         this.context = context;
-        this.arr = arr;
+        this.videos = videos;
         this.activity=activity;
     }
 
@@ -43,24 +44,29 @@ public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.ViewHolder> 
 
     @Override
     public void onBindViewHolder(@NonNull VideoAdapter.ViewHolder holder, @SuppressLint("RecyclerView") int position) {
-        Glide.with(context).load("file://"+arr.get(position).getThumb())
+        Glide.with(context).load("file://"+videos.get(position).getThumb())
                 .skipMemoryCache(false)
                 .into(holder.photoImageView);
         holder.mainLayout.setBackgroundColor(Color.parseColor("#FFFFFF"));
         holder.mainLayout.setAlpha(0);
+        // onBindViewHolder - Class VideoAdapter
         holder.mainLayout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent=new Intent(context,FullVideoView.class);
-                intent.putExtra("video",arr.get(position).getPath());
-                activity.startActivity(intent);
+                Intent intent = new Intent(context, FullVideoView.class);
+                intent.putExtra("","test");
+                Video video = videos.get(position);
+                Bundle videoBundle = new Bundle();
+                videoBundle.putSerializable("video", video);
+                intent.putExtra("videoBundle",videoBundle);
+                context.startActivity(intent);
             }
         });
     }
 
     @Override
     public int getItemCount() {
-        return arr.size();
+        return videos.size();
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {

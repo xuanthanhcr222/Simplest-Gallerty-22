@@ -2,16 +2,12 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="?attr/background_color"
     android:orientation="vertical">
 
-<!--    <TextView-->
-<!--        android:layout_width="wrap_content"-->
-<!--        android:layout_height="wrap_content"-->
-<!--        android:text="Album"/>-->
 
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/albumRecycler"
+        android:id="@+id/imageRecycler"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
+
 </LinearLayout>

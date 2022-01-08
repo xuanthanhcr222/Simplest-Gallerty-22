@@ -9,13 +9,4 @@
         app:showAsAction="always"
         android:title="Share"
         android:icon="@drawable/share_web_send_chain_icon"/>
-    <item
-        android:id="@+id/menu_wallpaper"
-        android:title="Set wallpaper" />
-    <item
-        android:id="@+id/menu_lockScreen"
-        android:title="Set lock screen" />
-    <item
-        android:id="@+id/menu_setAll"
-        android:title="Set all" />
 </menu>

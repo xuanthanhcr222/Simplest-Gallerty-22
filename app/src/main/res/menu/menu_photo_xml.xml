@@ -2,24 +2,36 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
-        android:id="@+id/togglePhotoView"
-        android:icon="@drawable/ic_baseline_view_list_24"
-        app:showAsAction="always"
-        android:title="togglePhotoView"></item>
-    <item
-        android:id="@+id/menu_setting"
-        android:title="Setting" />
-    <item
-        android:id="@+id/menu_about"
-        android:title="About" />
-    <item android:title="Contact">
+        android:id="@+id/menu_sort"
+        android:title="Sort By..." >
         <menu>
             <item
-                android:id="@+id/menu_email"
-                android:title="Email" />
+                android:id="@+id/menu_byDate"
+                android:title="Date"/>
             <item
-                android:id="@+id/menu_phone"
-                android:title="Phone" />
+                android:id="@+id/menu_byName"
+                android:title="Name"/>
+            <item
+                android:id="@+id/menu_bySize"
+                android:title="Size"/>
         </menu>
     </item>
+    <item
+        android:id="@+id/menu_themeMode"
+        android:title="Mode">
+        <menu>
+            <item
+                android:id="@+id/menu_darkMode"
+                android:title="Dark Mode"/>
+            <item
+                android:id="@+id/menu_lightMode"
+                android:title="Light Mode"/>
+        </menu>
+    </item>
+    <item
+        android:id="@+id/menu_trashBin"
+        android:title="Trash Bin" />
+    <item
+        android:id="@+id/menu_about"
+        android:title="About Us" />
 </menu>

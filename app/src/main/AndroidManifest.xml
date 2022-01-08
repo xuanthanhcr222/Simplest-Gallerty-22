@@ -3,21 +3,28 @@
     package="com.example.galleryv1">
 
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.SET_WALLPAPER" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
     <application
         android:allowBackup="true"
+        android:hardwareAccelerated="false"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.GalleryV1">
-        <activity android:name=".FullImageView"
-            android:parentActivityName=".MainActivity"
-            android:label="Full Screen"/>
-        <activity android:name=".ImageDetails"
-            android:parentActivityName=".FullImageView"
-            android:label="Details"/>
+        android:theme="@style/Theme.Light">
+        <activity
+            android:name=".AlbumDetail"
+            android:exported="true" />
+        <activity
+            android:name=".FullImageView"
+            android:label="Full Screen"
+            android:parentActivityName=".MainActivity" />
+        <activity
+            android:name=".FullVideoView"
+            android:label="Full Screen"
+            android:parentActivityName=".MainActivity" />
         <activity
             android:name=".MainActivity"
             android:exported="true">

@@ -1,71 +1,60 @@
 package com.example.galleryv1;
 
-import android.database.Cursor;
-import android.net.Uri;
-import android.os.Bundle;
-import android.os.Environment;
-import android.provider.MediaStore;
-import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.attribute.BasicFileAttributes;
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
+import android.content.Intent;
+import android.database.Cursor;
+import android.net.Uri;
+import android.os.Bundle;
+import android.provider.MediaStore;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.Toast;
+
 import java.util.ArrayList;
 import java.util.Date;
 
-public class FragmentImage extends Fragment {
+public class AlbumDetail extends AppCompatActivity {
 
-
-
+    Album album;
     private RecyclerView recyclerView;
     private ArrayList<Photo>photos;
     private PhotoAdapter adapter;
 
-    @Nullable
+
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View view= inflater.inflate(R.layout.fragment_image_layout,container,false);
-        recyclerView=(RecyclerView) view.findViewById(R.id.imageRecycler);
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.album_details);
+
+        Intent intent = getIntent();
+
+        if(intent.hasExtra("albumBundle")) {
+            Bundle albumBundle = intent.getBundleExtra("albumBundle");
+            album = (Album) albumBundle.getSerializable("album");
+        }
+        else {
+            Toast.makeText(this, "No Data!", Toast.LENGTH_SHORT).show();
+        }
+
+        getAllPhotosOfAlbum();
+
+        recyclerView=(RecyclerView) findViewById(R.id.imageRecycler);
         recyclerView.setHasFixedSize(true);
 
-        adapter=new PhotoAdapter(getContext(), photos);
+        adapter=new PhotoAdapter(this, photos);
         recyclerView.setAdapter(adapter);
         int numColumn = 3;
-        recyclerView.setLayoutManager(new GridLayoutManager(getActivity(), numColumn));
-        return view;
-    }
-
-    @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-
-        getAllPhotos();
-
-//        Bundle bundle = getArguments();
-//        if (bundle != null) {
-//            photos = (ArrayList<Photo>) bundle.getSerializable("photoList");
-//        }
-//        else
-//        {
-//            photos = new ArrayList<>();
-//        }
+        recyclerView.setLayoutManager(new GridLayoutManager(this, numColumn));
 
     }
 
-    private void getAllPhotos(){
+    private void getAllPhotosOfAlbum(){
         if (photos != null) {
             photos.clear();
         } else {
@@ -86,11 +75,11 @@ public class FragmentImage extends Fragment {
         };
 
         Uri imagesUri = android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
-        Cursor imageCursor = getContext().getContentResolver().query(
+        Cursor imageCursor = this.getApplication().getContentResolver().query(
                 MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
                 imageProjection,
-                null,
-                null,
+                MediaStore.Images.ImageColumns.BUCKET_DISPLAY_NAME + " = ? ",
+                new String[]{album.getName()},
                 MediaStore.Images.ImageColumns.DATE_ADDED + " DESC" //Sắp xếp theo ngày tạo
         );
 
@@ -106,13 +95,12 @@ public class FragmentImage extends Fragment {
                 Long modifiedDateTimeStamp = imageCursor.getLong(imageCursor.getColumnIndexOrThrow(MediaStore.Images.ImageColumns.DATE_MODIFIED));
                 Date createdDate = new Date(createdDateTimeStamp*1000);
                 Date modifiedDate = new Date(modifiedDateTimeStamp*1000);
-                String thumb = imageCursor.getString(imageCursor.getColumnIndexOrThrow(MediaStore.Images.Thumbnails.DATA));
 
+                String thumb = imageCursor.getString(imageCursor.getColumnIndexOrThrow(MediaStore.Images.Thumbnails.DATA));
                 int width = imageCursor.getInt(imageCursor.getColumnIndexOrThrow(MediaStore.Images.ImageColumns.WIDTH));
                 int height = imageCursor.getInt(imageCursor.getColumnIndexOrThrow(MediaStore.Images.ImageColumns.HEIGHT));
 
                 int size = imageCursor.getInt(imageCursor.getColumnIndexOrThrow(MediaStore.Images.ImageColumns.SIZE));
-
 
                 Photo photo = new Photo(name,src,createdDate, modifiedDate, thumb, width, height, size);
                 photos.add(photo);

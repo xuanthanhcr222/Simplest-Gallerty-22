@@ -3,16 +3,7 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
-        <entry key="..\:/Users/MXGC/OneDrive/Desktop/Homework/DA/gallery43/app/src/main/res/layout/activity_main.xml" value="0.20416666666666666" />
-        <entry key="..\:/Users/MXGC/OneDrive/Desktop/Homework/DA/gallery43/app/src/main/res/layout/cardview_video.xml" value="0.20416666666666666" />
-        <entry key="..\:/Users/MXGC/OneDrive/Desktop/Homework/DA/gallery43/app/src/main/res/layout/fragment_album_layout.xml" value="0.20416666666666666" />
-        <entry key="..\:/Users/MXGC/OneDrive/Desktop/Homework/DA/gallery43/app/src/main/res/layout/fragment_image_layout.xml" value="0.20416666666666666" />
-        <entry key="..\:/Users/MXGC/OneDrive/Desktop/Homework/DA/gallery43/app/src/main/res/layout/fragment_video_layout.xml" value="0.20416666666666666" />
-        <entry key="..\:/Users/MXGC/OneDrive/Desktop/Homework/DA/gallery43/app/src/main/res/layout/full_image_view.xml" value="0.20416666666666666" />
-        <entry key="..\:/Users/MXGC/OneDrive/Desktop/Homework/DA/gallery43/app/src/main/res/layout/full_video_view.xml" value="0.20416666666666666" />
-        <entry key="..\:/Users/MXGC/OneDrive/Desktop/Homework/DA/gallery43/app/src/main/res/layout/image_details.xml" value="0.20416666666666666" />
-        <entry key="..\:/Users/MXGC/OneDrive/Desktop/Homework/DA/gallery43/app/src/main/res/layout/recycler_grid_item_album.xml" value="0.20416666666666666" />
-        <entry key="..\:/Users/MXGC/OneDrive/Desktop/Homework/DA/gallery43/app/src/main/res/layout/recycler_grid_item_photo.xml" value="0.20416666666666666" />
+        <entry key="..\:/Users/MXGC/OneDrive/Desktop/gallery_final/final_toi5/supergallery/app/src/main/res/layout/slider.xml" value="0.1" />
       </map>
     </option>
   </component>

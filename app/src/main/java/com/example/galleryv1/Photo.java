@@ -1,23 +1,37 @@
 package com.example.galleryv1;
 
+import android.provider.MediaStore;
+
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
 
-public class Photo {
+public class Photo implements Serializable {
     private String name;
     private String src;
     private Date createdDate;
-    private ArrayList <String> tags;
+    private Date modifiedDate;
+    private String thumb;
+
+
+    private int width;
+    private int height;
+    private int size;
+
     private int typeDisplay = 1;
 
     private static final int TYPE_GRID = 1;
     private static final int TYPE_LIST = 2;
 
-    public Photo(String name, String src, Date createdDate, ArrayList<String> tags) {
+    public Photo(String name, String src, Date createdDate, Date modifiedDate, String thumb, int width, int height, int size) {
         this.name = name;
         this.src = src;
         this.createdDate = createdDate;
-        this.tags = tags;
+        this.modifiedDate = modifiedDate;
+        this.thumb = thumb;
+        this.width = width;
+        this.height = height;
+        this.size = size;
     }
 
     public String getName() {
@@ -44,12 +58,45 @@ public class Photo {
         this.createdDate = createdDate;
     }
 
-    public ArrayList<String> getTags() {
-        return tags;
+
+    public String getThumb() {
+        return thumb;
     }
 
-    public void setTags(ArrayList<String> tags) {
-        this.tags = tags;
+    public void setThumb(String thumb) {
+        this.thumb = thumb;
+    }
+
+    public Date getModifiedDate() {
+        return modifiedDate;
+    }
+
+    public void setModifiedDate(Date modifiedDate) {
+        this.modifiedDate = modifiedDate;
+    }
+
+    public int getWidth() {
+        return width;
+    }
+
+    public void setWidth(int width) {
+        this.width = width;
+    }
+
+    public int getHeight() {
+        return height;
+    }
+
+    public void setHeight(int height) {
+        this.height = height;
+    }
+
+    public int getSize() {
+        return size;
+    }
+
+    public void setSize(int size) {
+        this.size = size;
     }
 
     public int getTypeDisplay() {
