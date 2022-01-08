@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/togglePhotoView"
+        android:icon="@drawable/ic_baseline_view_list_24"
+        app:showAsAction="always"
+        android:title="togglePhotoView"></item>
+    <item
+        android:id="@+id/menu_setting"
+        android:title="Setting" />
+    <item
+        android:id="@+id/menu_about"
+        android:title="About" />
+    <item android:title="Contact">
+        <menu>
+            <item
+                android:id="@+id/menu_email"
+                android:title="Email" />
+            <item
+                android:id="@+id/menu_phone"
+                android:title="Phone" />
+        </menu>
+    </item>
+</menu>
