@@ -12,6 +12,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -20,6 +21,7 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.util.ArrayList;
 
 public class PhotoAdapter extends RecyclerView.Adapter<PhotoAdapter.ViewHolder>{
@@ -49,7 +51,7 @@ public class PhotoAdapter extends RecyclerView.Adapter<PhotoAdapter.ViewHolder>{
         return photos;
     }
 
-    public int getImage(int position) {
+    public String getImage(int position) {
         return photos.get(position).getSrc();
     }
 
@@ -66,33 +68,37 @@ public class PhotoAdapter extends RecyclerView.Adapter<PhotoAdapter.ViewHolder>{
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, @SuppressLint("RecyclerView") int position) {
-        int photoSrc = photos.get(position).getSrc();
-        holder.photoImageView.setImageResource(photoSrc);
+        String photoSrc = photos.get(position).getSrc();
+//        holder.photoImageView.setImageResource(photoSrc);
+
+        File file = new File(photoSrc);
+        Bitmap myBitmap = BitmapFactory.decodeFile(file.getAbsolutePath());
+        holder.photoImageView.setImageBitmap(myBitmap);
 
         holder.mainLayout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(context, FullImageView.class);
-                intent.putExtra("Photo", photoSrc);
-                intent.putExtra("details_name", photos.get(position).getName());
-                intent.putExtra("details_date", photos.get(position).getCreatedDate().toString());
-                intent.putExtra("details_dimension", getDemension(photoSrc));
-                intent.putExtra("details_size", getSize(photoSrc));
-                intent.putExtra("details_src", "@drawable :))");
-                context.startActivity(intent);
+//                Intent intent = new Intent(context, FullImageView.class);
+//                intent.putExtra("Photo", photoSrc);
+//                intent.putExtra("details_name", photos.get(position).getName());
+//                intent.putExtra("details_date", photos.get(position).getCreatedDate().toString());
+//                intent.putExtra("details_dimension", getDemension(photoSrc));
+//                intent.putExtra("details_size", getSize(photoSrc));
+//                intent.putExtra("details_src", "@drawable :))");
+//                context.startActivity(intent);
             }
         });
     }
 
-    public String getDemension(int s){
-        BitmapFactory.Options o = new BitmapFactory.Options();
-        o.inTargetDensity = DisplayMetrics.DENSITY_DEFAULT;
-        Bitmap bmp = BitmapFactory.decodeResource(context.getResources(), s, o);
-        int w = bmp.getWidth();
-        int h = bmp.getHeight();
-        String result = w + " x " + h;
-        return result;
-    }
+//    public String getDemension(String photoSrc){
+//        BitmapFactory.Options o = new BitmapFactory.Options();
+//        o.inTargetDensity = DisplayMetrics.DENSITY_DEFAULT;
+//        Bitmap bmp = BitmapFactory.decodeResource(context.getResources(), photoSrc, o);
+//        int w = bmp.getWidth();
+//        int h = bmp.getHeight();
+//        String result = w + " x " + h;
+//        return result;
+//    }
 
     public String getSize(int s){
         Bitmap bitmapOrg = BitmapFactory.decodeResource(context.getResources(),s);

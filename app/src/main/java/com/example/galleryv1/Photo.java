@@ -5,7 +5,7 @@ import java.util.Date;
 
 public class Photo {
     private String name;
-    private int src;
+    private String src;
     private Date createdDate;
     private ArrayList <String> tags;
     private int typeDisplay = 1;
@@ -13,7 +13,7 @@ public class Photo {
     private static final int TYPE_GRID = 1;
     private static final int TYPE_LIST = 2;
 
-    public Photo(String name, int src, Date createdDate, ArrayList<String> tags) {
+    public Photo(String name, String src, Date createdDate, ArrayList<String> tags) {
         this.name = name;
         this.src = src;
         this.createdDate = createdDate;
@@ -28,11 +28,11 @@ public class Photo {
         this.name = name;
     }
 
-    public int getSrc() {
+    public String getSrc() {
         return src;
     }
 
-    public void setSrc(int src) {
+    public void setSrc(String src) {
         this.src = src;
     }
 
