@@ -1,17 +1,41 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+
+<androidx.coordinatorlayout.widget.CoordinatorLayout
+xmlns:android="http://schemas.android.com/apk/res/android"
+xmlns:app="http://schemas.android.com/apk/res-auto"
+xmlns:tools="http://schemas.android.com/tools"
+android:layout_width="match_parent"
+android:layout_height="match_parent"
+android:background="?attr/background_color"
+android:orientation="vertical"
+tools:context=".FragmentAlbum">
+
+
+
+<androidx.recyclerview.widget.RecyclerView
+    android:id="@+id/albumRecycler"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="?attr/background_color"
-    android:orientation="vertical">
+    android:layout_height="match_parent" />
 
-<!--    <TextView-->
-<!--        android:layout_width="wrap_content"-->
-<!--        android:layout_height="wrap_content"-->
-<!--        android:text="Album"/>-->
-
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/albumRecycler"
+<com.google.android.material.bottomappbar.BottomAppBar
+    android:id="@+id/full_image_bottomtab"
+    android:layout_width="match_parent"
+    android:layout_height="45dp"
+    android:layout_gravity="bottom"
+    android:backgroundTint="?attr/background_color"
+    tools:ignore="BottomAppBar">
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
-</LinearLayout>
+        android:layout_height="match_parent"
+        android:orientation="horizontal"
+        android:background="?attr/background_color">
+        <ImageButton
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:src="@drawable/ic_baseline_add_24"
+            android:background="@android:color/transparent"
+            android:layout_weight="1"
+            android:id="@+id/addBtn"/>
+    </LinearLayout>
+</com.google.android.material.bottomappbar.BottomAppBar>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

@@ -13,10 +13,14 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.provider.MediaStore;
+import android.provider.Settings;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -37,9 +41,6 @@ public class MainActivity extends AppCompatActivity {
     };
 
 
-//    ArrayList <Album> albums;
-//    ArrayList <Photo> photos;
-//    ArrayList <Video> videos;
 
     private SectionPageAdapter sectionPageAdapter;
     private ViewPager viewPager;
@@ -70,11 +71,14 @@ public class MainActivity extends AppCompatActivity {
 //            }
 //        });
 
-        if (android.os.Build.VERSION.SDK_INT >= 23) {
-            ActivityCompat.requestPermissions(MainActivity.this,
-                    new String[]{Manifest.permission.READ_EXTERNAL_STORAGE,Manifest.permission.WRITE_EXTERNAL_STORAGE},REQUEST_EXTERNAL_STORAGE);
-        }
+//        if (android.os.Build.VERSION.SDK_INT >= 23) {
+//            ActivityCompat.requestPermissions(MainActivity.this,
+//                    new String[]{Manifest.permission.READ_EXTERNAL_STORAGE,Manifest.permission.WRITE_EXTERNAL_STORAGE},REQUEST_EXTERNAL_STORAGE);
+//        }
 
+        if(!checkPermission()){
+            requestPermission();
+        }
 
 //        getAllMedia();
 
@@ -102,9 +106,12 @@ public class MainActivity extends AppCompatActivity {
 
 
         SectionPageAdapter adapter=new SectionPageAdapter(getSupportFragmentManager());
+
+
         adapter.addFragment(photoFrag,"photo");
         adapter.addFragment(videoFrag,"Video");
         adapter.addFragment(new FragmentAlbum(),"Album");
+
         viewPager.setAdapter(adapter);
     }
 
@@ -124,17 +131,11 @@ public class MainActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
 
         switch (item.getItemId()){
-            case R.id.menu_sort:
-                Toast.makeText(this, "1", Toast.LENGTH_SHORT).show();
-                break;
             case R.id.menu_darkMode:
                 AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
                 break;
             case R.id.menu_lightMode:
                 AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
-                break;
-            case R.id.menu_trashBin:
-                Toast.makeText(this, "3", Toast.LENGTH_SHORT).show();
                 break;
             case R.id.menu_about:
                 final AlertDialog.Builder showInfoDialog = new AlertDialog.Builder(this);
@@ -155,113 +156,37 @@ public class MainActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-//    public void getAllMedia()
-//    {
-//        if (photos != null) {
-//            photos.clear();
-//        } else {
-//            photos = new ArrayList<>();
-//        }
-//        if (videos != null) {
-//            videos.clear();
-//        } else {
-//            videos = new ArrayList<>();
-//        }
-//
-//        String[] imageProjection  = {
-//                MediaStore.Images.ImageColumns.DATA, // path của photo
-//                MediaStore.Images.ImageColumns.DISPLAY_NAME, // tên hiển thị photo
-//                MediaStore.Images.ImageColumns.DATE_MODIFIED, // ngày chỉnh sửa
-//                MediaStore.Images.ImageColumns.DATE_ADDED, // ngày add
-//                MediaStore.Images.ImageColumns.BUCKET_DISPLAY_NAME, // Tên thư mục chứa
-//                MediaStore.Images.ImageColumns.SIZE, // kích thước
-//                MediaStore.Images.ImageColumns.WIDTH, //
-//                MediaStore.Images.ImageColumns.HEIGHT, //
-//                MediaStore.Images.ImageColumns.RESOLUTION, ////
-//                MediaStore.Images.Thumbnails.DATA
-//        };
-//
-//        Uri imagesUri = android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
-//        Cursor imageCursor = this.getApplication().getContentResolver().query(
-//                MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
-//                imageProjection,
-//                null,
-//                null,
-//                MediaStore.Images.ImageColumns.DATE_ADDED + " DESC" //Sắp xếp theo ngày tạo
-//        );
-//
-//        try {
-//            if (imageCursor != null) {
-//                imageCursor.moveToFirst();
-//            }
-//            do{
-//                String name = imageCursor.getString(imageCursor.getColumnIndexOrThrow(MediaStore.Images.ImageColumns.DISPLAY_NAME));
-//                String src = imageCursor.getString(imageCursor.getColumnIndexOrThrow(MediaStore.Images.ImageColumns.DATA));
-//
-//                Long createdDateTimeStamp = imageCursor.getLong(imageCursor.getColumnIndexOrThrow(MediaStore.Images.ImageColumns.DATE_ADDED));
-//                Long modifiedDateTimeStamp = imageCursor.getLong(imageCursor.getColumnIndexOrThrow(MediaStore.Images.ImageColumns.DATE_MODIFIED));
-//                Date createdDate = new Date(createdDateTimeStamp*1000);
-//                Date modifiedDate = new Date(createdDateTimeStamp*1000);
-//
-//                String thumb = imageCursor.getString(imageCursor.getColumnIndexOrThrow(MediaStore.Images.Thumbnails.DATA));
-//                int width = imageCursor.getColumnIndexOrThrow(MediaStore.Images.Thumbnails.WIDTH);
-//                int height = imageCursor.getColumnIndexOrThrow(MediaStore.Images.Thumbnails.HEIGHT);
-//                String resolution = imageCursor.getString(imageCursor.getColumnIndexOrThrow(MediaStore.Images.ImageColumns.RESOLUTION));
-//                int size = imageCursor.getColumnIndexOrThrow(MediaStore.Images.ImageColumns.SIZE);
-//
-//                Photo photo = new Photo(name,src,createdDate, modifiedDate, thumb, width, height, resolution, size);
-//                photos.add(photo);
-//
-//            }while(imageCursor.moveToNext());
-//            imageCursor.close();
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
-//
-//
-//        String[] videoProjection  = {
-//                MediaStore.Video.VideoColumns.DATA,
-//                MediaStore.Video.VideoColumns.DATE_ADDED,
-//                MediaStore.Video.VideoColumns.DATE_MODIFIED,
-//                MediaStore.Video.VideoColumns.DURATION,
-//                MediaStore.Video.VideoColumns.DISPLAY_NAME,
-//                MediaStore.Video.VideoColumns.SIZE,
-//                MediaStore.Video.VideoColumns.BUCKET_DISPLAY_NAME,
-//                MediaStore.Video.VideoColumns.MIME_TYPE,
-//                MediaStore.Video.Thumbnails.DATA
-//        };
-//
-//        Uri videosUri = android.provider.MediaStore.Video.Media.EXTERNAL_CONTENT_URI;
-//        Cursor videoCursor = this.getApplication().getContentResolver().query(
-//                MediaStore.Video.Media.EXTERNAL_CONTENT_URI,
-//                videoProjection,
-//                null,
-//                null,
-//                MediaStore.Images.ImageColumns.DATE_ADDED + " DESC" //Sắp xếp theo ngày tạo
-//        );
-//
-//        try {
-//            if (videoCursor != null) {
-//                videoCursor.moveToFirst();
-//            }
-//            do{
-////                String name = videoCursor.getString(videoCursor.getColumnIndexOrThrow(MediaStore.Video.VideoColumns.DISPLAY_NAME));
-//                String path = videoCursor.getString(videoCursor.getColumnIndexOrThrow(MediaStore.Video.VideoColumns.DATA));
-////                Long createdDateTimeStamp = videoCursor.getLong(videoCursor.getColumnIndexOrThrow(MediaStore.Video.VideoColumns.DATE_ADDED));
-////                Date createdDate = new Date(createdDateTimeStamp*1000);
-//                String thumb = videoCursor.getString(videoCursor.getColumnIndexOrThrow(MediaStore.Video.Thumbnails.DATA));
-//
-//                Video video = new Video(path, thumb, false) ;
-//
-//                videos.add(video);
-//
-//            }while(videoCursor.moveToNext());
-//            videoCursor.close();
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
-//
-//
-//
-//    }
+
+    //Nguồn tham khảo:
+    //https://stackoverflow.com/questions/68480231/i-cant-delete-image-from-gallery-with-android?fbclid=IwAR19Hfjpi5o3eBnBqTW8gr4pUIHICvEXXw2MnQ2AZDTGgrAOzfnjl13GkI8
+    private void requestPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            try {
+                Intent intent = new Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION);
+                intent.addCategory("android.intent.category.DEFAULT");
+                intent.setData(Uri.parse(String.format("package:%s",getApplicationContext().getPackageName())));
+            } catch (Exception e) {
+                Intent intent = new Intent();
+                intent.setAction(Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION);
+            }
+        } else {
+            //below android 11
+            ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 10);
+        }
+    }
+    private boolean checkPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            return Environment.isExternalStorageManager();
+        } else {
+            int result = 0;
+            if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                result = this.getApplication().checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE);
+                int result1 = this.getApplication().checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE);
+                return result == PackageManager.PERMISSION_GRANTED && result1 == PackageManager.PERMISSION_GRANTED;
+            }
+        }
+        return true;
+    }
 }
+
+

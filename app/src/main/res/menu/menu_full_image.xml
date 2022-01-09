@@ -1,6 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item android:id="@+id/menu_favorite"
+        android:title="FavoriteImg"
+        app:showAsAction="always|collapseActionView"
+        android:icon="@drawable/ic_favorite_shadow"/>
+
     <item android:id="@+id/menu_ttct"
         app:showAsAction="always"
         android:title="Ttct"
@@ -18,4 +23,8 @@
     <item
         android:id="@+id/menu_setAll"
         android:title="Set all" />
+
+    <item
+        android:id="@+id/menu_autoSlide"
+        android:title="Slide Image" />
 </menu>

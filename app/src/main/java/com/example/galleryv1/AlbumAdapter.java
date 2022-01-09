@@ -67,7 +67,11 @@ public class AlbumAdapter extends RecyclerView.Adapter<AlbumAdapter.ViewHolder>{
     @Override
     public void onBindViewHolder(@NonNull AlbumAdapter.ViewHolder holder, @SuppressLint("RecyclerView") int position) {
 
-        Glide.with(context).load("file://"+albums.get(position).getThumbnail())
+//        Glide.with(context).load("file://"+albums.get(position).getThumbnail())
+//                .skipMemoryCache(false)
+//                .into(holder.albumImageView);
+
+        Glide.with(context).load(albums.get(position).getThumbnail())
                 .skipMemoryCache(false)
                 .into(holder.albumImageView);
 

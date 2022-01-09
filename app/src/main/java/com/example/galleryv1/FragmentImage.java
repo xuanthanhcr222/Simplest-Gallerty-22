@@ -26,13 +26,14 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 
-public class FragmentImage extends Fragment {
+public class  FragmentImage extends Fragment {
 
 
 
     private RecyclerView recyclerView;
     private ArrayList<Photo>photos;
     private PhotoAdapter adapter;
+    FavoriteDB favoriteDB;
 
     @Nullable
     @Override
@@ -52,16 +53,8 @@ public class FragmentImage extends Fragment {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        favoriteDB=new FavoriteDB(getContext());
         getAllPhotos();
-
-//        Bundle bundle = getArguments();
-//        if (bundle != null) {
-//            photos = (ArrayList<Photo>) bundle.getSerializable("photoList");
-//        }
-//        else
-//        {
-//            photos = new ArrayList<>();
-//        }
 
     }
 
@@ -73,6 +66,7 @@ public class FragmentImage extends Fragment {
         }
 
         String[] imageProjection  = {
+                MediaStore.Images.ImageColumns._ID,
                 MediaStore.Images.ImageColumns.DATA, // path của photo
                 MediaStore.Images.ImageColumns.DISPLAY_NAME, // tên hiển thị photo
                 MediaStore.Images.ImageColumns.DATE_MODIFIED, // ngày chỉnh sửa
@@ -81,7 +75,6 @@ public class FragmentImage extends Fragment {
                 MediaStore.Images.ImageColumns.SIZE, // kích thước
                 MediaStore.Images.ImageColumns.WIDTH, //
                 MediaStore.Images.ImageColumns.HEIGHT, //
-//                MediaStore.Images.ImageColumns.RESOLUTION, ////
                 MediaStore.Images.Thumbnails.DATA
         };
 
@@ -114,7 +107,11 @@ public class FragmentImage extends Fragment {
                 int size = imageCursor.getInt(imageCursor.getColumnIndexOrThrow(MediaStore.Images.ImageColumns.SIZE));
 
 
-                Photo photo = new Photo(name,src,createdDate, modifiedDate, thumb, width, height, size);
+                int id = imageCursor.getInt(imageCursor.getColumnIndexOrThrow(MediaStore.Images.ImageColumns._ID));
+
+                boolean favStatus=favoriteDB.readFavorite(id);
+                Photo photo = new Photo(id, name,src,createdDate, modifiedDate, thumb, width, height, size, favStatus);
+
                 photos.add(photo);
 
             }while(imageCursor.moveToNext());
@@ -122,8 +119,5 @@ public class FragmentImage extends Fragment {
         } catch (Exception e) {
             e.printStackTrace();
         }
-
-
-
     }
 }

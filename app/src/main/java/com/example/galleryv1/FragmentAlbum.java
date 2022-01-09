@@ -1,5 +1,7 @@
 package com.example.galleryv1;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
@@ -9,6 +11,10 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CheckBox;
+import android.widget.EditText;
+import android.widget.ImageButton;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -36,6 +42,8 @@ public class FragmentAlbum extends Fragment {
     private ArrayList<Album> albums;
     private AlbumAdapter adapter;
 
+    ImageButton addBtn;
+    EditText newAlbumNameEditText;
 
     @Nullable
     @Override
@@ -44,12 +52,25 @@ public class FragmentAlbum extends Fragment {
 
         recyclerView=(RecyclerView) view.findViewById(R.id.albumRecycler);
 
+        addBtn = (ImageButton) view.findViewById(R.id.addBtn);
+
+
 
         recyclerView.setHasFixedSize(true);
         adapter=new AlbumAdapter(getContext(), albums);
         recyclerView.setAdapter(adapter);
         int numColumn = 3;
         recyclerView.setLayoutManager(new GridLayoutManager(getActivity(), numColumn));
+
+        addBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                displayAddAlbumtDialog();
+//                Toast.makeText(getContext(), "Add Album Btn", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+
         return view;
     }
 
@@ -57,6 +78,51 @@ public class FragmentAlbum extends Fragment {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         getAllAlbums();
+
+    }
+
+    private void displayAddAlbumtDialog(){
+        LayoutInflater inflater = getLayoutInflater();
+        View addAlbumDialogLayout = inflater.inflate(R.layout.custom_add_album_dialog, null);
+
+
+        newAlbumNameEditText = (EditText) addAlbumDialogLayout.findViewById(R.id.newAlbumNameEditText);
+
+
+        final AlertDialog.Builder addAlbumDialog = new AlertDialog.Builder(getContext());
+
+        addAlbumDialog.setTitle("Add new album");
+        addAlbumDialog.setView(addAlbumDialogLayout);
+
+
+        addAlbumDialog.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                String albumName = newAlbumNameEditText.getText().toString();
+
+                Toast.makeText(getContext(), "new album name: " + albumName, Toast.LENGTH_SHORT).show();
+                addNewAlbum(albumName);
+            }
+        });
+
+        addAlbumDialog.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.cancel();
+            }
+        });
+
+        addAlbumDialog.show();
+    }
+
+    private void addNewAlbum(String albumName)
+    {
+        String emptyFolderImgSrc = Uri.parse("android.resource://"+R.class.getPackage().getName()+"/" + R.drawable.folder).toString();
+        String dcimFolderPath = Environment.getExternalStorageDirectory().toString() + "/DCIM";
+        File newFolder = new File(dcimFolderPath + "/" + albumName);
+        newFolder.mkdirs();
+        Album album = new Album(newFolder.getName(),newFolder.getPath(),emptyFolderImgSrc);
+        albums.add(album);
     }
 
     private void getAllAlbums() {
@@ -65,6 +131,8 @@ public class FragmentAlbum extends Fragment {
         } else {
             albums = new ArrayList<>();
         }
+
+
 
         ArrayList<Album> albumArrayList = new ArrayList<>();
 
@@ -81,8 +149,6 @@ public class FragmentAlbum extends Fragment {
                 null,
                 null
         );
-
-//        Cursor cursor = getContext().getContentResolver().query(allImagesuri, projection, null, null, null);
 
         try {
             if (albumCursor != null) {
@@ -107,16 +173,13 @@ public class FragmentAlbum extends Fragment {
             e.printStackTrace();
         }
 
+        //Lấy ra danh sách album (không trùng lặp) từ albumArrayList
         HashSet<Album> uniqueAlbum = new HashSet<>(albumArrayList);
-
         albums = new ArrayList<>(uniqueAlbum);
-
-
-//        ArrayList<String> thumbs = new ArrayList<>();
-
         int countAlbum = albums.size();
 
 
+        //Thêm ảnh Thumbnail cho từng album
         for (int i = 0; i < countAlbum; i++) {
             String albumPath = albums.get(i).getSrc();
             String albumName = albums.get(i).getName();
@@ -127,10 +190,6 @@ public class FragmentAlbum extends Fragment {
                     MediaStore.Images.ImageColumns.BUCKET_DISPLAY_NAME
             };
 
-//            /storage/emulated/0/DCIM
-//            /storage/emulated/0/DCIM/Screenshots/Screenshot_20211206-021132_GalleryV1.jpg
-//            Screenshot_20211206-021132_GalleryV1.jpg
-//            20211204_170045.jpg
             Cursor albumThumbCursor = getContext().getContentResolver().query(
                     MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
                     albumThumbProjection,
@@ -154,5 +213,32 @@ public class FragmentAlbum extends Fragment {
                 e.printStackTrace();
             }
         }
+
+
+        //Vì các album ở trên bắt buộc phải có ảnh
+        //Nên đoạn code dưới đây sẽ tìm những album (không có ảnh) trong thư mục DCIM
+        //(ví dụ như những album mới tạo)
+
+        String dcimFolderPath = Environment.getExternalStorageDirectory().toString() + "/DCIM";
+        File dcimFolder = new File(dcimFolderPath);
+        File[] dcimListFiles = dcimFolder.listFiles();
+
+
+        //Hình nền cho những album rỗng
+        String emptyFolderImgSrc = Uri.parse("android.resource://"+R.class.getPackage().getName()+"/" + R.drawable.folder).toString();
+
+        for (File dcimFolderItem : dcimListFiles)
+        {
+            if(dcimFolderItem.isDirectory())
+            {
+                File[] dcimFolderItemListFiles = dcimFolderItem.listFiles();
+                if(dcimFolderItemListFiles.length == 0)
+                {
+                    Album album = new Album(dcimFolderItem.getName(), dcimFolderItem.getPath(), emptyFolderImgSrc);
+                    albums.add(album);
+                }
+            }
+        }
+        Log.d("dcim",dcimFolderPath);
     }
 }

@@ -13,6 +13,7 @@ import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -20,10 +21,13 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.ConditionVariable;
 import android.os.Environment;
+import android.os.Handler;
+import android.os.Looper;
 import android.os.StrictMode;
 import android.provider.MediaStore;
 import android.telecom.Call;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -39,10 +43,13 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatDelegate;
 import androidx.coordinatorlayout.widget.CoordinatorLayout;
 import androidx.viewpager.widget.ViewPager;
 
 import com.bumptech.glide.Glide;
+import com.dsphotoeditor.sdk.activity.DsPhotoEditorActivity;
+import com.dsphotoeditor.sdk.utils.DsPhotoEditorConstants;
 import com.google.android.material.bottomappbar.BottomAppBar;
 
 import java.io.ByteArrayOutputStream;
@@ -50,6 +57,8 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class FullImageView extends AppCompatActivity {
     ImageView mainImageView;
@@ -57,7 +66,14 @@ public class FullImageView extends AppCompatActivity {
     //ArrayList<String> photoSrc;
     ArrayList<Photo> photos;
     int CurrentPosition = 0;
+    ViewPager slider;
+    FavoriteDB favoriteDB;
+    Menu menuImg;
     //String Src = "";
+
+    Timer mtimer;
+
+    public static final int DS_PHOTO_EDITOR_REQUEST_CODE = 200;
 
     BottomAppBar bottomTab;
     ImageButton editBtn, moreBtn, deleteBtn;
@@ -77,20 +93,18 @@ public class FullImageView extends AppCompatActivity {
 
         getView();
 
+        favoriteDB=new FavoriteDB(FullImageView.this);
+
         Intent intent = getIntent();
         Bundle photoBundle = intent.getBundleExtra("photoBundle");
         photos = (ArrayList<Photo>) photoBundle.getSerializable("photos");
         CurrentPosition = intent.getIntExtra("position", 0);
 
-        ViewPager slider = findViewById(R.id.slider_sieucapvodichvutru);
+        slider = findViewById(R.id.slider_sieucapvodichvutru);
         ViewPagerAdapter adapter = new ViewPagerAdapter(this, photos);
         slider.setAdapter(adapter);
         slider.setCurrentItem(CurrentPosition);
 
-        //final LayoutInflater factory = getLayoutInflater();
-        //final View view = factory.inflate(R.layout.activity_full_image, null);
-        //mainImageView = (ImageView) view.findViewById(R.id.imageViewFull);
-        //mainImageView.setImageResource(R.drawable.pause_button);
 
 
         slider.setOnClickListener(new View.OnClickListener() {
@@ -114,6 +128,7 @@ public class FullImageView extends AppCompatActivity {
             @Override
             public void onPageSelected(int position) {
                 CurrentPosition = position;
+                setFavoriteIcon();
             }
 
             @Override
@@ -124,10 +139,52 @@ public class FullImageView extends AppCompatActivity {
         editBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Toast.makeText(FullImageView.this, "1", Toast.LENGTH_SHORT).show();
-                //Intent intent = new Intent(FullImageView.this, EditImageActivity.class);
-                //intent.putExtra("path", photos.get(CurrentPosition).getSrc());
-                //tartActivityForResult(intent, REQUEST_EDIT_IMAGE);
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                    StrictMode.VmPolicy.Builder builder = new StrictMode.VmPolicy.Builder();
+                    StrictMode.setVmPolicy(builder.build());
+                }
+                //Toast.makeText(FullImageView.this, "1", Toast.LENGTH_SHORT).show();
+                Uri inputImageUri = Uri.fromFile(new File(photos.get(CurrentPosition).getSrc()));
+                Intent intent = new Intent(FullImageView.this, DsPhotoEditorActivity.class);
+                intent.setData(inputImageUri);
+                intent.putExtra(DsPhotoEditorConstants.DS_PHOTO_EDITOR_OUTPUT_DIRECTORY, "DS Photo Editor");
+                intent.putExtra(DsPhotoEditorConstants.DS_TOOL_BAR_BACKGROUND_COLOR, Color.BLACK);
+                if (AppCompatDelegate.getDefaultNightMode() == AppCompatDelegate.MODE_NIGHT_YES)
+                {
+                    intent.putExtra(DsPhotoEditorConstants.DS_MAIN_BACKGROUND_COLOR, Color.parseColor("#FF000000"));
+                }else {
+                    intent.putExtra(DsPhotoEditorConstants.DS_MAIN_BACKGROUND_COLOR, Color.parseColor("#FFFFFFFF"));
+                }
+                startActivityForResult(intent, DS_PHOTO_EDITOR_REQUEST_CODE);
+            }
+        });
+
+        deleteBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                AlertDialog.Builder myAlertDialog = new AlertDialog.Builder(FullImageView.this);
+                myAlertDialog.setTitle("Delete Photo");
+                myAlertDialog.setMessage("Do you want to delete it?");
+                myAlertDialog.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface arg0, int arg1) {
+                        try {
+                            Photo photo = photos.get(CurrentPosition);
+                            int delete = getContentResolver().delete(Uri.withAppendedPath(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, String.valueOf(photo.getId())), null, null);
+                            if (delete > 0) {
+                                photos.remove(CurrentPosition);
+                                if (photos.size() < 1) {
+                                    onBackPressed();
+                                }
+                                slider.getAdapter().notifyDataSetChanged();
+                            }
+                        }catch (Exception e){
+                            Log.d("deletedError",e.getMessage());
+                        }
+                    }});
+                myAlertDialog.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface arg0, int arg1) {
+                    }});
+                myAlertDialog.show();
             }
         });
     }
@@ -140,38 +197,70 @@ public class FullImageView extends AppCompatActivity {
 
     }
 
-    class MyGesture extends ScaleGestureDetector.SimpleOnScaleGestureListener {
+    private void autoSlideImage()
+    {
+        if(photos == null || photos.isEmpty() || slider == null) return;
 
-        float scale = 1.0F, scaleBeg = 0, scaleEnd = 0;
-
-        @Override
-        public boolean onScale(ScaleGestureDetector detector) {
-            scale *= detector.getScaleFactor();
-            mainImageView.setScaleX(scale);
-            mainImageView.setScaleY(scale);
-            return super.onScale(detector);
+        if (mtimer == null) {mtimer = new Timer();}
+        mtimer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                new Handler(Looper.getMainLooper()).post(new Runnable() {
+                    @Override
+                    public void run() {
+                        int currentItem = slider.getCurrentItem();
+                        int totalItem = photos.size() -1;
+                        if (currentItem < totalItem)
+                        {
+                            currentItem++;
+                            slider.setCurrentItem(currentItem);
+                        }
+                        else
+                        {
+                            slider.setCurrentItem(0);
+                        }
+                    }
+                });
+            }
+        }, 500, 3000);
+    }
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (mtimer != null)
+        {
+            mtimer.cancel();
+            mtimer = null;
         }
 
-        @Override
-        public boolean onScaleBegin(ScaleGestureDetector detector) {
-            scaleBeg = scale;
-            return super.onScaleBegin(detector);
-        }
-
-        @Override
-        public void onScaleEnd(ScaleGestureDetector detector) {
-            scaleEnd = scale;
-            super.onScaleEnd(detector);
-        }
+        favoriteDB.close();
     }
 
+
     public boolean onCreateOptionsMenu(Menu menu) {
+        menuImg=menu;
         getMenuInflater().inflate(R.menu.menu_full_image, menu);
+        setFavoriteIcon();
         return super.onCreateOptionsMenu(menu);
+    }
+
+    private void setFavoriteIcon() {
+        MenuItem item=menuImg.findItem(R.id.menu_favorite);
+        if(photos.get(CurrentPosition).favStatus){
+            item.setIcon(R.drawable.ic_favorite_red);
+        }
+        else{
+            item.setIcon(R.drawable.ic_favorite_shadow);
+        }
     }
 
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         switch (item.getItemId()) {
+            case R.id.menu_favorite:{
+                new FavoriteThread().execute(photos.get(CurrentPosition).favStatus);
+                break;
+            }
+
             case R.id.menu_ttct: {
 
                 photo = photos.get(CurrentPosition);
@@ -218,6 +307,11 @@ public class FullImageView extends AppCompatActivity {
             case R.id.menu_setAll:{
                 new SetWallpaperThread().execute(SET_ALL);
                 break;
+
+            }
+            case R.id.menu_autoSlide:{
+                this.autoSlideImage();
+                break;
             }
             default:
                 break;
@@ -253,6 +347,36 @@ public class FullImageView extends AppCompatActivity {
                 return false;
             }
             return true;
+        }
+    }
+
+    private class FavoriteThread extends AsyncTask <Boolean, Void, Boolean> {
+
+        @Override
+        protected Boolean doInBackground(Boolean... booleans) {
+            boolean isDone;
+            if (booleans != null && booleans[0]) {
+                isDone = favoriteDB.deleteFavorite(photos.get(CurrentPosition).getId());
+            } else {
+                isDone = favoriteDB.insertFavorite(photos.get(CurrentPosition).getId());
+            }
+            return isDone;
+        }
+
+        @Override
+        protected void onPostExecute(Boolean aBoolean) {
+            super.onPostExecute(aBoolean);
+            if (aBoolean) {
+                MenuItem menuItem =  menuImg.findItem(R.id.menu_favorite);
+                if(photos.get(CurrentPosition).setFavStatus()) {
+                    menuItem.setIcon(R.drawable.ic_favorite_red);
+                } else {
+                    menuItem.setIcon(R.drawable.ic_favorite_shadow);
+                }
+                //imageSlider.notifyDataSetChanged();
+            } else {
+                Toast.makeText(FullImageView.this, "An unexpected error has occured. Try again later.", Toast.LENGTH_LONG).show();
+            }
         }
     }
 }

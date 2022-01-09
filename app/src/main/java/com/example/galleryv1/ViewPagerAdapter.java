@@ -15,6 +15,7 @@ import androidx.annotation.NonNull;
 import androidx.viewpager.widget.PagerAdapter;
 import androidx.viewpager.widget.ViewPager;
 
+import com.bogdwellers.pinchtozoom.ImageMatrixTouchHandler;
 import com.bumptech.glide.Glide;
 
 import java.io.File;
@@ -63,6 +64,9 @@ class ViewPagerAdapter extends PagerAdapter {
                 .skipMemoryCache(false)
                 .into(imageView);
         container.addView(itemview);
+        Context context = container.getContext();
+        ImageMatrixTouchHandler imageMatrixTouchHandler = new ImageMatrixTouchHandler(context);
+        imageView.setOnTouchListener(imageMatrixTouchHandler);
         return imageView;
     }
 

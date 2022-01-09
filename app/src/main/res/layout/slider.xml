@@ -24,13 +24,12 @@
         android:layout_width="match_parent"
         android:layout_height="45dp"
         android:layout_gravity="bottom"
-        android:backgroundTint="?attr/background_color"
+        android:background="?attr/background_color"
         tools:ignore="BottomAppBar">
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:orientation="horizontal"
-            android:background="?attr/background_color">
+            android:orientation="horizontal">
             <ImageButton
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"

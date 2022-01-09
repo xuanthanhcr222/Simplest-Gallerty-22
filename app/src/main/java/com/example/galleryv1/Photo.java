@@ -7,12 +7,13 @@ import java.util.ArrayList;
 import java.util.Date;
 
 public class Photo implements Serializable {
+    private int id;
     private String name;
     private String src;
     private Date createdDate;
     private Date modifiedDate;
     private String thumb;
-
+    public boolean favStatus;
 
     private int width;
     private int height;
@@ -23,7 +24,8 @@ public class Photo implements Serializable {
     private static final int TYPE_GRID = 1;
     private static final int TYPE_LIST = 2;
 
-    public Photo(String name, String src, Date createdDate, Date modifiedDate, String thumb, int width, int height, int size) {
+    public Photo(int id, String name, String src, Date createdDate, Date modifiedDate, String thumb, int width, int height, int size, boolean favStatus) {
+        this.id = id;
         this.name = name;
         this.src = src;
         this.createdDate = createdDate;
@@ -32,6 +34,15 @@ public class Photo implements Serializable {
         this.width = width;
         this.height = height;
         this.size = size;
+        this.favStatus=favStatus;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
     }
 
     public String getName() {
@@ -58,6 +69,13 @@ public class Photo implements Serializable {
         this.createdDate = createdDate;
     }
 
+    public Date getModifiedDate() {
+        return modifiedDate;
+    }
+
+    public void setModifiedDate(Date modifiedDate) {
+        this.modifiedDate = modifiedDate;
+    }
 
     public String getThumb() {
         return thumb;
@@ -65,14 +83,6 @@ public class Photo implements Serializable {
 
     public void setThumb(String thumb) {
         this.thumb = thumb;
-    }
-
-    public Date getModifiedDate() {
-        return modifiedDate;
-    }
-
-    public void setModifiedDate(Date modifiedDate) {
-        this.modifiedDate = modifiedDate;
     }
 
     public int getWidth() {
@@ -97,6 +107,11 @@ public class Photo implements Serializable {
 
     public void setSize(int size) {
         this.size = size;
+    }
+
+    public boolean setFavStatus(){
+        this.favStatus=!this.favStatus;
+        return this.favStatus;
     }
 
     public int getTypeDisplay() {

@@ -12,8 +12,11 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.Toast;
 
 import java.util.ArrayList;
@@ -25,12 +28,21 @@ public class AlbumDetail extends AppCompatActivity {
     private RecyclerView recyclerView;
     private ArrayList<Photo>photos;
     private PhotoAdapter adapter;
+    FavoriteDB favoriteDB;
+
+    ImageButton addBtn;
+    ImageButton backBtn;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.album_details);
+
+        favoriteDB=new FavoriteDB(AlbumDetail.this);
+
+        addBtn = (ImageButton) findViewById(R.id.addBtn);
+        backBtn = (ImageButton) findViewById(R.id.backBtn);
 
         Intent intent = getIntent();
 
@@ -52,7 +64,56 @@ public class AlbumDetail extends AppCompatActivity {
         int numColumn = 3;
         recyclerView.setLayoutManager(new GridLayoutManager(this, numColumn));
 
+
+        addBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(AlbumDetail.this, SelectPhotoActivity.class);
+
+                Bundle albumBundle = new Bundle();
+                albumBundle.putSerializable("album", album);
+                intent.putExtra("albumBundle",albumBundle);
+
+
+                startActivity(intent);
+            }
+        });
+
+        backBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(AlbumDetail.this, MainActivity.class);
+                startActivity(intent);
+            }
+        });
     }
+
+
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_album_details,menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+//    @Override
+//    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+
+//        switch (item.getItemId()){
+//            case R.id.menu_add_photo:
+////                Toast.makeText(this, "Add Photo to album menu", Toast.LENGTH_SHORT).show();
+////                Intent intent = new Intent(AlbumDetail.this, SelectPhotoActivity.class);
+////
+////                Bundle albumBundle = new Bundle();
+////                albumBundle.putSerializable("album", album);
+////                intent.putExtra("albumBundle",albumBundle);
+////
+////
+////                startActivity(intent);
+//                break;
+//        }
+//        return super.onOptionsItemSelected(item);
+//    }
 
     private void getAllPhotosOfAlbum(){
         if (photos != null) {
@@ -62,6 +123,7 @@ public class AlbumDetail extends AppCompatActivity {
         }
 
         String[] imageProjection  = {
+                MediaStore.Images.ImageColumns._ID,
                 MediaStore.Images.ImageColumns.DATA, // path của photo
                 MediaStore.Images.ImageColumns.DISPLAY_NAME, // tên hiển thị photo
                 MediaStore.Images.ImageColumns.DATE_MODIFIED, // ngày chỉnh sửa
@@ -70,7 +132,6 @@ public class AlbumDetail extends AppCompatActivity {
                 MediaStore.Images.ImageColumns.SIZE, // kích thước
                 MediaStore.Images.ImageColumns.WIDTH, //
                 MediaStore.Images.ImageColumns.HEIGHT, //
-//                MediaStore.Images.ImageColumns.RESOLUTION, ////
                 MediaStore.Images.Thumbnails.DATA
         };
 
@@ -102,7 +163,12 @@ public class AlbumDetail extends AppCompatActivity {
 
                 int size = imageCursor.getInt(imageCursor.getColumnIndexOrThrow(MediaStore.Images.ImageColumns.SIZE));
 
-                Photo photo = new Photo(name,src,createdDate, modifiedDate, thumb, width, height, size);
+
+                int id = imageCursor.getInt(imageCursor.getColumnIndexOrThrow(MediaStore.Images.ImageColumns._ID));
+
+                boolean favStatus=favoriteDB.readFavorite(id);
+                Photo photo = new Photo(id, name,src,createdDate, modifiedDate, thumb, width, height, size, favStatus);
+
                 photos.add(photo);
 
             }while(imageCursor.moveToNext());

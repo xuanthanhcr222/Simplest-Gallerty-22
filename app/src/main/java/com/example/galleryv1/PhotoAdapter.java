@@ -7,6 +7,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -78,63 +79,29 @@ public class PhotoAdapter extends RecyclerView.Adapter<PhotoAdapter.ViewHolder> 
                 .skipMemoryCache(false)
                 .into(holder.photoImageView);
 
-        //for (int i = 0; i < photos.size(); i++) {
-        //    String src = photos.get(i).getSrc();
-        //    photoSrc.add(src);
-        //}
-
-//        String photoSrc = photos.get(position).getThumb();
-//        holder.photoImageView.setImageResource(photoSrc);
-
-//        File file = new File(photoSrc);
-//        Bitmap myBitmap = BitmapFactory.decodeFile(file.getAbsolutePath());
-//        holder.photoImageView.setImageBitmap(myBitmap);
-
         holder.mainLayout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                //Intent intent = new Intent(context, FullImageView.class);
-                //Photo photo = photos.get(position);
-                //Bundle photoBundle = new Bundle();
-                //photoBundle.putSerializable("photo", photo);
-                //intent.putExtra("photoBundle",photoBundle);
-                //context.startActivity(intent);
-                Intent intent = new Intent(context, FullImageView.class);
-                //intent.putExtra("photoSrc", photoSrc);
-                Bundle photoBundle = new Bundle();
-                photoBundle.putSerializable("photos", photos);
-                intent.putExtra("position", position);
-                intent.putExtra("photoBundle",photoBundle);
-                context.startActivity(intent);
+                try {
+                    Intent intent = new Intent(context, FullImageView.class);
+
+                    Log.d("size",Integer.toString(photos.size()));
+//                    Log.d("size2",Integer.toString(photos2.size()));
+                    Log.d("position", Integer.toString(position));
+
+                    Bundle photoBundle = new Bundle();
+                    photoBundle.putSerializable("photos", photos);
+                    intent.putExtra("position", position);
+                    intent.putExtra("photoBundle",photoBundle);
+                    context.startActivity(intent);
+                } catch(Exception e) {
+                    int x = 1;
+                    Log.e("position",e.getMessage());
+                }
             }
         });
     }
 
-//    public String getDemension(String photoSrc){
-//        BitmapFactory.Options o = new BitmapFactory.Options();
-//        o.inTargetDensity = DisplayMetrics.DENSITY_DEFAULT;
-//        Bitmap bmp = BitmapFactory.decodeResource(context.getResources(), photoSrc, o);
-//        int w = bmp.getWidth();
-//        int h = bmp.getHeight();
-//        String result = w + " x " + h;
-//        return result;
-//    }
-
-//    public String getSize(int s){
-//        Bitmap bitmapOrg = BitmapFactory.decodeResource(context.getResources(),s);
-//        Bitmap bitmap = bitmapOrg;
-//        ByteArrayOutputStream stream = new ByteArrayOutputStream();
-//        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, stream);
-//        byte[] imageInByte = stream.toByteArray();
-//        long lengthbmp = imageInByte.length;
-//        long imageInKB = lengthbmp/1024;
-//        if (imageInKB/1024.0 > 1) {
-//            return Math.round(imageInKB*100.0/1024.0)/100.0 + " MB";
-//        }
-//        else {
-//            return imageInKB + " KB";
-//        }
-//    }
 
     @Override
     public int getItemCount() {
